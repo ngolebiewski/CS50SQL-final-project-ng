@@ -4,6 +4,8 @@
 CREATE TABLE "tour_operators" (
     "id" INTEGER,
     "name" TEXT UNIQUE NOT NULL,
+    "username"
+    "password"
     "address_1" TEXT,
     "address_2" TEXT,
     "city" TEXT NOT NULL,
@@ -22,6 +24,7 @@ CREATE TABLE "staff" (
     "id" INTEGER,
     "company_id" INTEGER NOT NULL,
     "company_role" TEXT NOT NULL CHECK("company_role" IN ('owner', 'guide', 'office')),
+    "admin" TEXT NOT NULL DEFAULT('False') CHECK ("admin" IN ('True', 'False')), -- using Python keywords for T/F expecting to build backend with FastAPI
     "payrate" INTEGER NOT NULL,
     "first_name" TEXT NOT NULL,
     "last_name" TEXT NOT NULL,
@@ -143,6 +146,16 @@ CREATE TABLE "reviews" (
     PRIMARY KEY("id"),
     FOREIGN KEY("user_id") REFERENCES "users"("id"),
     FOREIGN KEY("tour_id") REFERENCES "tour_types"("id")
+);
+
+-- allows employees of the tour app to manage the system.
+CREATE TABLE "db_admins" (
+    "id" INTEGER,
+    "username" TEXT NOT NULL UNIQUE,
+    "password" TEXT NOT NULL CHECK(LENGTH("password")>8),
+    "email" TEXT NOT NULL,
+    "admin_level" TEXT NOT NULL CHECK("admin_level" IN ('superadmin', 'admin', 'analyst')),
+    PRIMARY KEY("id")
 );
 
 

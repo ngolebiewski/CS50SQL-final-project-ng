@@ -13,7 +13,7 @@ CREATE TABLE "tour_operators" (
     "email" TEXT NOT NULL,
     "logo_url" TEXT NOT NULL, -- link to image file for company logo
     "website_url" TEXT NOT NULL,
-    "date_joined" NUMERIC NOT NULL,
+    "date_joined" NUMERIC NOT NULL DEFAULT CURRENT_DATE,
     PRIMARY KEY("id")
 ); 
 
@@ -31,10 +31,12 @@ CREATE TABLE "staff" (
     "email" TEXT NOT NULL,
     "profile_img_url" TEXT, -- link to profile image
     "bio" TEXT,
+    "date_added" NUMERIC NOT NULL DEFAULT CURRENT_DATE,
     PRIMARY KEY("id"),
     FOREIGN KEY("company_id") REFERENCES "tour_operators"("id") 
 ); 
 
+-- Represents start locations/addresses for tours.
 CREATE TABLE "locations" (
     "id" INTEGER,
     "name" TEXT NOT NULL,
@@ -46,6 +48,7 @@ CREATE TABLE "locations" (
     PRIMARY KEY("id")
 );
 
+-- Set base tour types, to use as a template for specific tour instances on `events`
 CREATE TABLE "tour_types" (
     "id" INTEGER,
     "company_id" INTEGER,
@@ -57,10 +60,19 @@ CREATE TABLE "tour_types" (
     "standard_start_time" NUMERIC,
     "duration" NUMERIC NOT NULL,
     "capacity" INTEGER NOT NULL,
+    "type" TEXT NOT NULL CHECK("type" IN ('walking', 'bus', 'indoor'))
     PRIMARY KEY("id"),
     FOREIGN KEY("company_id") REFERENCES "tour_operators"("id") 
     FOREIGN KEY("location_id") REFERENCES "locations"("id") 
 );
+
+-- CREATE TABLE "tour_keywords" (
+
+-- );
+
+-- CREATE TABLE "keywords" (
+
+-- );
 
 -- create ticket types for each tour operator, i.e. Student ticket $15
 CREATE TABLE "ticket_types" (
@@ -78,6 +90,7 @@ CREATE TABLE "events" (
     "id" INTEGER,
     "tour_id" INTEGER NOT NULL,
     "date" NUMERIC NOT NULL,
+    "attendees" INTEGER NOT NULL DEFAULT(0) CHECK("attendees" <= "capacity"), -- can't overbook tour without increasing capacity
     "capacity" INTEGER NOT NULL,
     "start_time" NUMERIC NOT NULL,
     "notes" TEXT,
@@ -94,23 +107,50 @@ CREATE TABLE "users" (
     "password" TEXT NOT NULL CHECK(LENGTH("password")>8),
     "mobile" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    PRIMARY KEY("id"),
+    "date_joined" NUMERIC NOT NULL DEFAULT CURRENT_DATE,
+    PRIMARY KEY("id")
 );
 
-CREATE TABLE "booking" (
+-- a user makes a booking of multiple tickets for a specific event
+CREATE TABLE "bookings" (
     "id" INTEGER,
     "user_id" INTEGER,
     "event_id" INTEGER,
-)
+    "time_booked" NUMERIC NOT NULL DEFAULT CURRENT_DATETIME,
+    "payment" NUMERIC NOT NULL DEFAULT(0.00)
+    PRIMARY KEY("id"),
+    FOREIGN KEY("user_id") REFERENCES "users"("id"),
+    FOREIGN KEY("event_id") REFERENCES "events"("id")
+);
 
+-- a booking can have multiple tickets per event
 CREATE TABLE "booking_tickets" (
     "booking_id" INTEGER,
     "ticket_type" TEXT NOT NULL,
     "ticket_amount" INTEGER NOT NULL,
     "first_name" TEXT NOT NULL,
-    "last_name" TEXT NOT NULL
+    "last_name" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT('not checked in') CHECK("status" IN('not checked-in', 'checked-in', 'cancelled'))
 );
+
+-- allow users to leave reviews on tours they attended, Limit to users that have attended a tour.
+CREATE TABLE "reviews" (
+    "id" INTEGER,
+    "user_id" INTEGER NOT NULL,
+    "tour_id" INTEGER NOT NULL,
+    "review" TEXT NOT NULL, -- require text review in addition to stars
+    "stars" INTEGER NOT NULL CHECK("stars" IN (1,2,3,4,5))
+    PRIMARY KEY("id"),
+    FOREIGN KEY("user_id") REFERENCES "users"("id"),
+    FOREIGN KEY("tour_id") REFERENCES "tour_types"("id")
+);
+
+
+
+-- CREATE VIEW "attendees" AS 
+
+-- CREATE VIEW
+-- Attendees by event 
 
 -- trigger or view?
 -- CREATE TABLE "attendees"(
@@ -135,4 +175,4 @@ CREATE TABLE "booking_tickets" (
 -- )
 
 -- run following commands to drop all tables -------------------------------------
--- DROP TABLE "tour_types"; DROP TABLE "ticket_types"; DROP TABLE "users"; DROP TABLE "locations"; DROP TABLE "staff"; DROP TABLE "tour_operators";
+DROP TABLE "booking_tickets"; DROP TABLE "bookings"; DROP TABLE "tour_types"; DROP TABLE "ticket_types"; DROP TABLE "users"; DROP TABLE "locations"; DROP TABLE "staff"; DROP TABLE "tour_operators";

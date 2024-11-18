@@ -4,8 +4,7 @@
 CREATE TABLE "tour_operators" (
     "id" INTEGER,
     "name" TEXT UNIQUE NOT NULL,
-    "username"
-    "password"
+    "nickname" TEXT UNIQUE,
     "address_1" TEXT,
     "address_2" TEXT,
     "city" TEXT NOT NULL,
@@ -63,9 +62,9 @@ CREATE TABLE "tour_types" (
     "standard_start_time" NUMERIC,
     "duration" NUMERIC NOT NULL,
     "capacity" INTEGER NOT NULL,
-    "type" TEXT NOT NULL CHECK("type" IN ('walking', 'bus', 'indoor'))
+    "type" TEXT NOT NULL CHECK("type" IN ('walking', 'bus', 'indoor')),
     PRIMARY KEY("id"),
-    FOREIGN KEY("company_id") REFERENCES "tour_operators"("id") 
+    FOREIGN KEY("company_id") REFERENCES "tour_operators"("id"), 
     FOREIGN KEY("location_id") REFERENCES "locations"("id") 
 );
 
@@ -117,10 +116,10 @@ CREATE TABLE "users" (
 -- a user makes a booking of multiple tickets for a specific event
 CREATE TABLE "bookings" (
     "id" INTEGER,
-    "user_id" INTEGER,
-    "event_id" INTEGER,
+    "user_id" INTEGER NOT NULL,
+    "event_id" INTEGER NOT NULL,
     "time_booked" NUMERIC NOT NULL DEFAULT CURRENT_DATETIME,
-    "payment" NUMERIC NOT NULL DEFAULT(0.00)
+    "payment" NUMERIC NOT NULL DEFAULT(0.00),
     PRIMARY KEY("id"),
     FOREIGN KEY("user_id") REFERENCES "users"("id"),
     FOREIGN KEY("event_id") REFERENCES "events"("id")
@@ -141,11 +140,13 @@ CREATE TABLE "reviews" (
     "id" INTEGER,
     "user_id" INTEGER NOT NULL,
     "tour_id" INTEGER NOT NULL,
+    "company_id" INTEGER NOT NULL,
     "review" TEXT NOT NULL, -- require text review in addition to stars
-    "stars" INTEGER NOT NULL CHECK("stars" IN (1,2,3,4,5))
+    "stars" INTEGER NOT NULL CHECK("stars" IN (1,2,3,4,5)),
     PRIMARY KEY("id"),
     FOREIGN KEY("user_id") REFERENCES "users"("id"),
-    FOREIGN KEY("tour_id") REFERENCES "tour_types"("id")
+    FOREIGN KEY("tour_id") REFERENCES "tour_types"("id"),
+    FOREIGN KEY("company_id") REFERENCES "tour_operators"("id")
 );
 
 -- allows employees of the tour app to manage the system.
@@ -157,6 +158,15 @@ CREATE TABLE "db_admins" (
     "admin_level" TEXT NOT NULL CHECK("admin_level" IN ('superadmin', 'admin', 'analyst')),
     PRIMARY KEY("id")
 );
+
+
+-- Show reviews of tour companies, sorted by average rating, sorted best at the top
+CREATE VIEW "review_summary" AS
+SELECT "tour_operators"."name", ROUND(AVG("stars"), 1) AS "average rating", COUNT("stars") AS "number reviews"
+FROM "tour_operators"
+JOIN "reviews" ON "tour_operators"."id" = "reviews"."company_id"
+GROUP BY "tour_operators"."id" -- OR "reviews"."company_id" are they interchangable?
+ORDER BY "average rating" DESC, "tour_operators"."name" ASC;
 
 
 
@@ -188,4 +198,4 @@ CREATE TABLE "db_admins" (
 -- )
 
 -- run following commands to drop all tables -------------------------------------
-DROP TABLE "booking_tickets"; DROP TABLE "bookings"; DROP TABLE "tour_types"; DROP TABLE "ticket_types"; DROP TABLE "users"; DROP TABLE "locations"; DROP TABLE "staff"; DROP TABLE "tour_operators";
+-- DROP VIEW "review_summary"; DROP TABLE "db_admins"; DROP TABLE "events"; DROP TABLE "booking_tickets"; DROP TABLE "bookings"; DROP TABLE "tour_types"; DROP TABLE "ticket_types"; DROP TABLE "users"; DROP TABLE "locations"; DROP TABLE "staff"; DROP TABLE "tour_operators";

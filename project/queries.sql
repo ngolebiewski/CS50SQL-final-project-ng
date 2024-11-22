@@ -13,6 +13,21 @@ FROM "staff"
 JOIN "tour_operators" ON "company_id" = "staff"
 WHERE "tour_operators"."name" = 'Nicks NYC Walking Tours';
 
+-- Populate a calendar with a company's upcoming tours for the next month
+SELECT *
+FROM "events" 
+JOIN "tour_types" ON "events"."tour_id" = "tour_types"."id"
+JOIN "tour_operators" ON "tour_operators"."id" = "tour_types"."company_id"
+JOIN "locations" ON "tour_types"."location_id" = "locations"."id"
+WHERE "events"."date" >= date() <= date('now','+1 month','-1 day'), --Selects today's date through one month from now, Reference -> https://sqlite.org/lang_datefunc.html 
+AND "tour_operators"."id" = (
+    SELECT "id" FROM "tour_operators" WHERE "name" = 'Nicks NYC Walking Tours'
+    )
+;
+
+
+
+
 -- See attendees of a tour
 
 -- Search for all tours in a city on a given day

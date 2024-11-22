@@ -6,7 +6,7 @@ Video overview: <URL HERE>
 
 ## Scope
 
-The database for TOUR-GUIDE-COOP.NYC includes all the entities necessary for independent tour guide companies to schedule, book, manage, invoice and accept payments for walking, bus, etc. tours -- and for guests to book, pay for, find and attend tours. The system will be queried for reminders, payments, and check-in status by guests, guides, and tour company office staff.
+The database for I-AM-A-TOURIST-AND-I-WALK.NYC includes all the entities necessary for independent tour guide companies to schedule, book, manage, invoice and accept payments for walking tours -- and for participants to find, book, pay for and attend tours. The system will be queried for reminders, payments, and check-in status by guests, guides, and tour company office staff.
 
 Included in the scope of this database is:
 
@@ -33,6 +33,7 @@ Out of scope elements are:
     * Connecting to Stripe, Paypal, and VENMO's APIs as vehicle for charging credit cards and accepting payments.
 * Various Admin and Auth levels of access would also be implemented at the application level, server issues JSON WEB TOKENS.
 * Group visits and bookings, this database focuses on individual sales.
+* Implementing a shopping cart for multiple tour purchases. This iteration supports single event sales.
 
 ## Functional Requirements
 

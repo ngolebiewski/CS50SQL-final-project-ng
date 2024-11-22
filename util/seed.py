@@ -35,5 +35,5 @@ cur.execute("""
 
 response = cur.execute("SELECT * FROM USERS")
 print(response.fetchall())
-
+con.commit()
 con.close()

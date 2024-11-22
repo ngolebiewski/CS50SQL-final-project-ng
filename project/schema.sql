@@ -68,13 +68,20 @@ CREATE TABLE "tour_types" (
     FOREIGN KEY("location_id") REFERENCES "locations"("id") 
 );
 
--- CREATE TABLE "tour_keywords" (
+-- Join table linking tour_types with keywords
+CREATE TABLE "tour_keywords" (
+    "tour_id" INTEGER NOT NULL,
+    "keyword_id" INTEGER NOT NULL, 
+    FOREIGN KEY "tour_id" REFERENCES "tour_types"("id"),
+    FOREGIN KEY "keyword_id" REFERENCES "keywords"("id")
+);
 
--- );
-
--- CREATE TABLE "keywords" (
-
--- );
+-- Set keywords for tours for searching, i.e. arts, culture, walking, history, food, etc.
+CREATE TABLE "keywords" (
+    "id" INTEGER,
+    "keyword" TEXT NOT NULL UNIQUE,
+    PRIMARY KEY("id")
+);
 
 -- create ticket types for each tour operator, i.e. Student ticket $15
 CREATE TABLE "ticket_types" (

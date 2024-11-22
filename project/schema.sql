@@ -22,13 +22,13 @@ CREATE TABLE "tour_operators" (
 CREATE TABLE "staff" (
     "id" INTEGER,
     "company_id" INTEGER NOT NULL,
-    "company_role" TEXT NOT NULL CHECK("company_role" IN ('owner', 'guide', 'office')),
+    "role" TEXT NOT NULL CHECK("role" IN ('owner', 'guide', 'office')),
     "admin" TEXT NOT NULL DEFAULT('False') CHECK ("admin" IN ('True', 'False')), -- using Python keywords for T/F expecting to build backend with FastAPI
     "payrate" INTEGER NOT NULL,
     "first_name" TEXT NOT NULL,
     "last_name" TEXT NOT NULL,
     "username" TEXT UNIQUE NOT NULL,
-    "password" TEXT NOT NULL CHECK(LENGTH("password")>8),
+    "password" TEXT NOT NULL CHECK(LENGTH("password")>8), -- Would be hashed in production
     "mobile" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "profile_img_url" TEXT, -- link to profile image
@@ -160,13 +160,28 @@ CREATE TABLE "db_admins" (
 );
 
 
--- Show reviews of tour companies, sorted by average rating, sorted best at the top
+-- Query to use the below views:
+    -- Top 10 tours
+    -- Top 10 tour companies
+    -- what is the rating of a tour
+    -- what is a company's #1 tour?
+
+-- Show aggregate reviews for tour operators, sorted by average rating, sorted best at the top
 CREATE VIEW "review_summary" AS
 SELECT "tour_operators"."name", ROUND(AVG("stars"), 1) AS "average rating", COUNT("stars") AS "number reviews"
 FROM "tour_operators"
 JOIN "reviews" ON "tour_operators"."id" = "reviews"."company_id"
 GROUP BY "tour_operators"."id" -- OR "reviews"."company_id" are they interchangable?
 ORDER BY "average rating" DESC, "tour_operators"."name" ASC;
+
+-- Show highest reviewed tours, sorted by average rating, sorted best at the top
+CREATE VIEW "tour_review_summary" AS
+SELECT "tour_types"."name", "tour_operators"."name", ROUND(AVG("stars"), 1) AS "average rating", COUNT("stars") AS "number reviews"
+FROM "tour_operators"
+JOIN "reviews" ON "tour_operators"."id" = "reviews"."company_id"
+JOIN "tour_types" ON "reviews"."company_id" = "tour_types"."company_id"
+GROUP BY "tour_types"."name"
+ORDER BY "average rating" DESC, "tour_types"."name" ASC, "tour_operators"."name" ASC;
 
 
 

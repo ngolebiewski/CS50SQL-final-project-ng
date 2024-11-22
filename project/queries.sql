@@ -2,9 +2,20 @@
 
 --COMMON QUERIES--
 
--- List tour companies and their staff
+-- Show all the tour companies in a given city
+SELECT "name"
+FROM "tour_operators"
+WHERE "city" = 'New York';
 
--- Search for tours in a city
+-- Search on a tour company name, list a tour operators' staff and title, this data could be used for an 'about' page on a website
+SELECT "first_name", "last_name", "role", "bio", "profile_img_url"
+FROM "staff"
+JOIN "tour_operators" ON "company_id" = "staff"
+WHERE "tour_operators"."name" = 'Nicks NYC Walking Tours';
+
+-- See attendees of a tour
+
+-- Search for all tours in a city on a given day
 
 -- See attendees of a tour
 
@@ -23,7 +34,9 @@
         -- people on booking
             -- check-in status
         
--- reviews for companies.
+-- See reviews for companies.
+
+-- Let an attendee leave a review on a tour.
 
 -- a Guide asks, what are my upcoming tour dates, times and names?
 

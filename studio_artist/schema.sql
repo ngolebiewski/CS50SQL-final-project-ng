@@ -14,7 +14,33 @@ CREATE TABLE "artists" (
     PRIMARY KEY("id")
 );
 
+-- These are the units that art can be organized within.
+-- Originally I had a `series` AND a `department` table, 
+-- but decided to consolidate since the columns were identical
+-- and added in the 'type' field to differentiate. 
+CREATE TABLE "section"(
+    "id" INTEGER, 
+    "name" TEXT UNIQUE,
+    "description" TEXT NOT NULL CHECK(length(description) <= 100),
+    "type" TEXT NOT NULL CHECK("type" IN('series', 'department')),
+    PRIMARY KEY("id")
+);
+
 CREATE TABLE "artworks" (
-    
-)
+    "id" INTEGER,
+    "artist" INTEGER NOT NULL,
+    "title" TEXT NOT NULL,
+    "size" TEXT NOT NULL,
+    "year" INTEGER,
+    "image_url" TEXT,
+    "department" INTEGER NOT NULL,
+    "series" INTEGER NOT NULL,
+    "date_added" CURRENT_TIMESTAMP,
+    PRIMARY KEY("id"),
+    FOREIGN KEY("artist") REFERENCES "artists"("id"),
+    FOREIGN KEY("department") REFERENCES "section"("id"),
+    FOREIGN KEY("series") REFERENCES "section"("id")
+);
+
+
 

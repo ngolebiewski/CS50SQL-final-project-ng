@@ -88,3 +88,7 @@ Some repetition: Staff and Users have similar fields, but I want to make sure th
 * limitation. 1 guide per tour. In reality could be multiple guides per tour. 
 
 * What might your database not be able to represent very well?
+
+## Dev notes
+
+* When using own machine, make the CLI output pretty with `.mode column` and `.headers on`

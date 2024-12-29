@@ -102,9 +102,11 @@ CREATE TABLE "events" (
     "attendees" INTEGER NOT NULL DEFAULT(0) CHECK("attendees" <= "capacity"), -- can't overbook tour without increasing capacity
     "capacity" INTEGER NOT NULL,
     "start_time" NUMERIC NOT NULL,
+    "tour_guide_id" INTEGER, -- Nullable, because you can schedule a staff member after the tour is added to the calendar, would implement as a join table in later iteration to accomodate multiple guides for bigger tour groups
     "notes" TEXT,
     PRIMARY KEY("id"),
-    FOREIGN KEY("tour_id") REFERENCES "tour_types"("id")
+    FOREIGN KEY("tour_id") REFERENCES "tour_types"("id"),
+    FOREIGN KEY("tour_guide_id") REFERENCES "staff"("id")
 );
 
 -- user profiles for the general tour booking tours
@@ -125,8 +127,10 @@ CREATE TABLE "bookings" (
     "id" INTEGER,
     "user_id" INTEGER NOT NULL,
     "event_id" INTEGER NOT NULL,
+    "note" TEXT,
     "time_booked" NUMERIC NOT NULL DEFAULT CURRENT_DATETIME,
     "payment" NUMERIC NOT NULL DEFAULT(0.00),
+    -- "payment_timestamp" NUMERIC NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY("id"),
     FOREIGN KEY("user_id") REFERENCES "users"("id"),
     FOREIGN KEY("event_id") REFERENCES "events"("id")
@@ -134,12 +138,13 @@ CREATE TABLE "bookings" (
 
 -- a booking can have multiple tickets per event
 CREATE TABLE "booking_tickets" (
-    "booking_id" INTEGER,
+    "booking_id" INTEGER NOT NULL,
     "ticket_type" TEXT NOT NULL,
     "ticket_amount" INTEGER NOT NULL,
     "first_name" TEXT NOT NULL,
     "last_name" TEXT NOT NULL,
-    "status" TEXT NOT NULL DEFAULT('not checked in') CHECK("status" IN('not checked-in', 'checked-in', 'cancelled'))
+    "status" TEXT NOT NULL DEFAULT('not checked in') CHECK("status" IN('not checked-in', 'checked-in', 'cancelled')),
+    FOREIGN KEY("booking_id") REFERENCES "bookings"."id"
 );
 
 -- allow users to leave reviews on tours they attended, Limit to users that have attended a tour.
@@ -156,7 +161,7 @@ CREATE TABLE "reviews" (
     FOREIGN KEY("company_id") REFERENCES "tour_operators"("id")
 );
 
--- allows employees of the tour app to manage the system.
+-- allows employees of the tour app tech company to manage the system.
 CREATE TABLE "db_admins" (
     "id" INTEGER,
     "username" TEXT NOT NULL UNIQUE,
@@ -165,7 +170,6 @@ CREATE TABLE "db_admins" (
     "admin_level" TEXT NOT NULL CHECK("admin_level" IN ('superadmin', 'admin', 'analyst')),
     PRIMARY KEY("id")
 );
-
 
 -- Query to use the below views:
     -- Top 10 tours
@@ -190,6 +194,16 @@ JOIN "tour_types" ON "reviews"."company_id" = "tour_types"."company_id"
 GROUP BY "tour_types"."name"
 ORDER BY "average rating" DESC, "tour_types"."name" ASC, "tour_operators"."name" ASC;
 
+-- Create an event view, since each event is in multiple tables
+CREATE VIEW "tour_view"  AS
+SELECT "events"."id", "events"."name", "staff"."first_name"
+FROM "events" 
+JOIN "tour_types" ON "events"."tour_id" = "tour_types"."id"
+JOIN "tour_operators" ON "tour_operators"."id" = "tour_types"."company_id"
+JOIN "locations" ON "tour_types"."location_id" = "locations"."id"
+JOIN "keywords" 
+JOIN "staff" ON "events"."tour_guide_id" = "staff"."id"
+;
 
 
 -- CREATE VIEW "attendees" AS 

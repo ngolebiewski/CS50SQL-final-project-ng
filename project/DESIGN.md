@@ -91,4 +91,4 @@ Some repetition: Staff and Users have similar fields, but I want to make sure th
 
 ## Dev notes
 
-* When using own machine, make the CLI output pretty with `.mode column` and `.headers on`
+* When using own machine, make the CLI output pretty with `.mode column` and `.headers on` via https://www.sqlite.org/cli.html section 5.

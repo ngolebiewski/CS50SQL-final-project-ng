@@ -68,12 +68,15 @@ The `artworks` table includes:
 * `title`, title of artwok as `TEXT`.
 * `size`, size of artwok as `TEXT`, i.e. 8" x 10" (" = inches).
 * `year`, year artwork was made as `INTEGER`.
-* NOTE: `media` via a `JOIN TABLE` as can be multiple media types i.e. watercolor, pen & ink, pencil all on the same artowrk. Therefore not 
-* `main_img_url`, `TEXT` field that is a Uniform Resource Locator link poitning to the main image file of the artwork. 
+* NOTE: `mediums` via a `JOIN TABLE` as can be multiple media types i.e. watercolor, pen & ink, pencil all on the same artowrk. Therefore not 
+* `image_url`, `TEXT` field that is a Uniform Resource Locator link poitning to the main image file of the artwork. 
+* `description`, `TEXT` describes artwork, or any notes that should be displayed along with the image.
 * `department`, borrowing this classifier from the Met Museum, to link to another table with each main classifier of an artwork, such as 'painting' or 'film' or 'photography', as a top level taxonomy, as opposed to the multiple possibilities of `media`. Represent as an `INTEGER` with the `FOREIGN KEY` constraint applied.
 * `series`, like `department`, can put an artwork within a `series` for classifying with an end use to produce useful sections on a website. For example, Picasso's blue period is a series, or for me, "Chinatown Paintings" or "Drawing-a-Day". Limit to one series. Represent as an `INTEGER` with the `FOREIGN KEY` constraint applied.
 * `sold`, boolean True/False, represented as an `INTEGER`, 0/1. Will connect to a buyer table. 
 * `price`, `OPTIONAL/NULLABLE`, `NUMERIC` to allow for decimal points in currency. Reflects the price of the artwork. Can be optional if work is not for sale.
+
+LIMITATION: Add a join table and an images table for additional images so an artwork can have multiple photos associated with it. i.e. a closeup, or on a gallery wall.
 
 IN A LATER EDITION:
 * `additional_artist`, `NULLABLE/OPTIONAL`, For collaborators on an artwork to be represented as an `INTEGER` connecting to the artist `id`. NOTE: In a future version use a join table to create the option for multiple collaborators. Choosing not to add that in now as it would be a needless complication for querying the artists of an artwork. Add to a later version of database.
@@ -102,6 +105,8 @@ The `series` table includes:
 * `description`, represents a description of the `series` in `TEXT`, for example to provide context and further information for the user. Picasso's Blue Period could be defined as: 
 
         "The Blue Period (Spanish: Período Azul) comprises the works produced by Spanish painter Pablo Picasso between 1901 and 1904. During this time, Picasso painted essentially monochromatic paintings in shades of blue and blue-green, only occasionally warmed by other colors. These sombre works, inspired by Spain and painted in Barcelona and Paris, are now some of his most popular works, although he had difficulty selling them at the time."  (from Wikipedia) https://en.wikipedia.org/wiki/Picasso%27s_Blue_Period
+
+
 
 #### Persons
 
@@ -156,3 +161,7 @@ In this section you should answer the following questions:
 
 * What are the limitations of your design?
 * What might your database not be able to represent very well?
+
+## Dev notes
+
+* When using own machine, make the CLI output pretty with `.mode column` and `.headers on` via https://www.sqlite.org/cli.html section 5.

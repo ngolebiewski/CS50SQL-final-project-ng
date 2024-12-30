@@ -23,3 +23,18 @@ VALUES (
 ),
     ('Nick', 'Golebiewski', 'Nick Golebiewski is a visual artist and software engineer, with a studio in Brooklyn, NY, who paints images of New York City.', '/images/nick_golebiewski.jpg', 'United States',NULL,NULL)
 ;
+
+-- Search all artworks by artist's last name.
+
+SELECT * FROM "artworks"
+WHERE "artist_id" = (SELECT "id" FROM "artists" WHERE "last_name" = "Picasso");
+-- Find artwork by title
+-- Find all artworks in a series
+-- List all series by an artist
+-- Find all artworks within a specific department in a section.
+-- Create a Sale and update artwoirk records with Triggers sold to True
+-- Search artworks by a keyword in descriptions using LIKE
+-- Find all artworks missing an image
+-- list all artists
+-- list all dead artists
+-- Find all artworks that have 'watercolor' as a medium.

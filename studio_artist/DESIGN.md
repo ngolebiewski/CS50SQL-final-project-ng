@@ -8,7 +8,7 @@ Video overview: <URL HERE>
 
 ## Scope
 
-This is a database for professional visual artists to track their artworks, sales, and contacts, exapandable for use by galleries and even museums. Personal note: I am switching careers from being a freelance visua artist to a software engineer, and will use this database to better access my 5,000+ artworks. 
+This is a SQLite database for professional visual artists to track their artworks, sales, and contacts, exapandable for use by galleries and even museums. Personal note: I am switching careers from being a freelance visua artist to a software engineer, and will use this database to better access my 5,000+ artworks. 
 
 This project takes inspiration from the Metropolitan Museum of Art's Public API for their artwork database (for organizing information about an individual artwork) with a touch of Etsy's sales capabilities. Included in the artwork's scope is:
 
@@ -132,7 +132,7 @@ The `organizations` table includes:
 * `city` as `TEXT`.
 * `state` as `TEXT`, in a future version add a constraint to 2 characters.
 * `zip` as `TEXT` --> what about zips that start with 0? That's why it's `TEXT`.
-* `country` as `TEXT`.
+* `country` as `TEXT`and DEFAULT to "United States", as the country that the author of this database is based in.
 
 #### Sold Artworks
 

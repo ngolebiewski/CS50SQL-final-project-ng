@@ -68,7 +68,7 @@ CREATE TABLE "organizations" (
     "state" TEXT NOT NULL,
     "country" TEXT DEFAULT('United States'),
     "phone" TEXT,
-    "email" TEXT NOT NULL,
+    "email" TEXT,
     "type" TEXT NOT NULL CHECK("type" IN ('museum', 'gallery', 'non-profit', 'restaurant', 'business', 'other')),
     PRIMARY KEY("id")
 );
@@ -81,7 +81,7 @@ CREATE TABLE "persons" (
     "email" TEXT UNIQUE,
     "phone" INTEGER,
     "org" INTEGER,
-    "type" TEXT NOT NULL DEFAULT('contact') CHECK("type" IN ('collector', 'friend', 'artist', 'client', 'collector', 'other')),
+    "type" TEXT NOT NULL DEFAULT('contact') CHECK("type" IN ('collector', 'friend', 'artist', 'client', 'curator', 'other')),
     PRIMARY KEY("id"),
     FOREIGN KEY("org") REFERENCES "organizations"("id")
 );
@@ -94,12 +94,23 @@ CREATE TABLE "sold_artworks" (
     "org_id" INTEGER,
     "price" DECIMAL,
     "date_sold" NUMERIC DATE, -- CHECK THIS.
-    "timestamp" CURRENT_TIMESTAMP,
+    "timestamp" DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY("id"),
     FOREIGN KEY("artwork_id") REFERENCES "artworks"("id"),
     FOREIGN KEY("person_id") REFERENCES "persons"("id"),
     FOREIGN KEY("org_id") REFERENCES "organizations"("id")
 );
+
+-- This trigger will auto update an artworks sold status from 0 (false) to 1 (true) when added to sold_artworks.
+CREATE TRIGGER "update_artwork_sold"
+AFTER INSERT ON sold_artworks
+FOR EACH ROW
+BEGIN
+    UPDATE "artworks"
+    SET "sold" = 1
+    WHERE "id" = NEW."artwork_id";
+END;
+
 
 
 -- CREATE A VIEW WITH ALL INFO PLACED INTO THE ARTWORKS TAB --> mediums, series, artist's name
@@ -124,7 +135,7 @@ JOIN "artworks" ON "artworks"."department"= "sections"."id";
 
 -- An overall view of the artworks for humans to read, filling in the artist name, mediums, series, and department from their id numbers. 
 CREATE VIEW "art_list" AS
-SELECT "artists"."id", first_name || ' ' || last_name AS "name", "artworks"."title", "size", "year", "mediums", "artworks"."image_url", "artworks"."descriptiom", 
+SELECT "artists"."id", first_name || ' ' || last_name AS "name", "artworks"."title", "size", "year", "mediums", "artworks"."image_url", "artworks"."description", 
     "series_by_artwork"."name" AS "series", "department_by_artwork"."name" AS "department", "price", "sold"
 FROM ARTWORKS
 JOIN ARTISTS ON "artists"."id" = "artworks"."artist_id"
@@ -134,5 +145,8 @@ LEFT JOIN "department_by_artwork" ON "department_by_artwork"."id" = "artworks"."
 ORDER BY "artists"."last_name" ASC, "artworks"."id" ASC
 ;
 
+-- helps when searching for artist_ids on Artworks
 CREATE INDEX "artist_ids" on "artworks" ("artist_id");
 
+-- helps when searching for titles of Artworks, often used when adding mediums to an artwork, or looking for a painting by name.
+CREATE INDEX "titles" on "artworks" ("titles");

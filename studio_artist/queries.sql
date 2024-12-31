@@ -25,7 +25,7 @@ VALUES (
 
 -- add mediums
 INSERT INTO "mediums" ("name")
-VALUES ('watercolor'), ('oil paint'), ('canvas'), ('paper'), ('pencil');
+VALUES ('watercolor'), ('oil paint'), ('canvas'), ('paper'), ('pencil'), ('gouache'), ('super 8 film'), ('posca marker'), ('pen & ink');
 
 -- add an artwork
 INSERT INTO "artworks" ("artist_id", "title", "size", "year")
@@ -104,6 +104,33 @@ UPDATE "artworks"
 SET "series" = (SELECT "id" FROM "sections" WHERE "name" = "Chinatown")
 WHERE "title" = "Grand Street";
 
+-- Update the price on Nick's painting...
+UPDATE "artworks"
+set "price" = 3000.00
+WHERE "title" = "Grand Street";
+
+-- Now, let's try adding in more fileds at once with some artworks (mediums still need to be added later?)
+INSERT INTO "artworks" ("artist_id", "title", "size", "year", "image_url", "department", "series")
+VALUES 
+    ((SELECT "id" FROM "artists" WHERE "last_name" = "Picasso"), 'Femme aux Bras Croisés (Woman with Folded Arms)', '81 × 58 cm', 1901, 
+        '/studio_artist/images/femme_aux_bras_croises.jpg', 
+        (SELECT "id" FROM "sections" WHERE "name" = 'Painting'),
+        (SELECT "id" FROM "sections" WHERE "name" = 'Blue Period')
+        )
+;
+
+-- add mediums to an the Femme aux Bras Croisés (Woman with Folded Arms) painting. OUT OF SCOPE: adding mediums when initially creating artwork record.
+INSERT INTO "artworks_mediums" ("artwork_id", "medium_id")
+VALUES(
+    (SELECT "id" FROM "artworks" WHERE "title" = 'Femme aux Bras Croisés (Woman with Folded Arms)'), 
+    (SELECT "id" FROM "mediums" WHERE "name" = "oil paint")
+    ),
+    (
+    (SELECT "id" FROM "artworks" WHERE "title" = 'Femme aux Bras Croisés (Woman with Folded Arms)'), 
+    (SELECT "id" FROM "mediums" WHERE "name" = "canvas")
+    );
+
+
 -- Search all artworks by artist's last name.
 SELECT * FROM "artworks"
 WHERE "artist_id" = (SELECT "id" FROM "artists" WHERE "last_name" = "Picasso");
@@ -140,18 +167,61 @@ WHERE "title" LIKE "%old%"
 ORDER BY "title" ASC;
 
 -- How many artworks do each artist have?
-SELECT first_name || ' ' || last_name AS "name", COUNT ("title") as "number artworks"
+SELECT first_name || ' ' || last_name AS "artist", COUNT ("title") as "number artworks"
 FROM "artists"
 JOIN "artworks" ON "artists"."id" = "artworks"."artist_id"
 GROUP BY "artist_id"
 ORDER BY "last_name";
 
+-- Which artworks have oil paint as a medium?
+SELECT "name" AS "artist", "title", "mediums"
+FROM "art_list" 
+WHERE "mediums" LIKE "%oil%"
+ORDER BY "title" ASC;
 
+-- List all dead artists
+SELECT "first_name", "last_name", "death_year", 'deceased'
+FROM "artists"
+WHERE "death_year" IS NOT NULL;
+
+-- List all artists that are still alive
+SELECT "first_name", "last_name", 'alive'
+FROM "artists"
+WHERE "death_year" IS NULL;
+
+-- We need someone who works at the Met Museum to buy one of Nick's Artworks!
+-- First Create the Organization record, since we'll need to attach the org id to the person record...
+INSERT INTO "organizations" ("name", "city", "state", "type")
+VALUES('Met Museum', 'New York', 'NY', 'museum');
+
+-- Create a person record...
+INSERT INTO "persons" ("first_name", "last_name", "org", "type")
+VALUES('Hermione', 'Granger', (SELECT "id" FROM "organizations" WHERE "name" = 'Met Museum'), 'curator');
+
+-- Create a sale! Hermione Granger from Hogwarts, I mean, the Met Museum purchase's Nick's Grand Street Painting.
+    -- Should be a constraint that the painting cannot already be sold, before selling it (although good for the artist's finances, just is impossible with one of a kind art)
+    -- Add to the sold_paintings list and Trigger an update on the sold status of the painting
+BEGIN TRANSACTION;
+INSERT INTO "sold_artworks" ("artwork_id", "person_id", "org_id", "price", "date_sold")
+    VALUES(
+        (SELECT "id" FROM "artworks" WHERE "title" = "Grand Street"),
+        (SELECT "id" FROM "persons" WHERE "first_name" = 'Hermione' AND "last_name" = 'Granger'),
+        (SELECT "id" FROM "organizations" WHERE "name" is "Met Museum"),
+        (SELECT "price" FROM "artworks" WHERE "title" = "Grand Street" AND "sold" = 0),  -- checks to make sure artwork isn't already sold
+        '2024-12-25'
+    );
+COMMIT;
+
+-- CHECK the sale record, and then the sold status 
+SELECT * FROM "sold_artworks";
+SELECT "title", "sold" FROM "artworks" WHERE "sold" = 1;
+
+-- UPDATE ARTWORKS SET SOLD = 0 WHERE TITLE = 'Grand Street';
 
 -- Find all artworks in a series
 -- List all series by an artist
 -- Find all artworks within a specific department in a section.
--- Create a Sale and update artwoirk records with Triggers sold to True
+-- Create a Sale and update artwork records with Triggers sold to True
 -- Search artworks by a keyword in descriptions using LIKE
 -- Find all artworks missing an image
 -- list all artists

@@ -21,11 +21,12 @@ This project takes inspiration from the Metropolitan Museum of Art's Public API 
 * Persons: Those who collect, express interest in artwork, studio contacts, or hire.
 * Organizations: For example, the organization a person belongs to that collected an artwork.
 * Sold Artworks: Keeps track of sold artworks. 
+
 * OUTSIDE THE CURRENT SCOPE: 
     * Payment system.
-    * fine art prints (reproductions of artworks for sale) inventory, 
-    * methods for importing data from Instagram (user doata download in JSON format) into the artworks table. 
-    *  Projects, when a person hires the artist, info on project can be tracked via this and used for invoicing, etc. 
+    * Fine art prints (reproductions of artworks for sale) inventory, 
+    * Methods for importing data from Instagram (user data download in JSON format) into the artworks table. 
+    * Projects, when a person hires the artist, info on project can be tracked via this and used for invoicing, etc. 
     * Alternate Images: Allows for multiple images of an artwork.
 
 ## Functional Requirements
@@ -39,9 +40,6 @@ This database will support:
 ## Representation
 
 Entities are captured in SQLite tables and an image folder with the following schema.
-
-![Entity Relationship Diagram for Art-Base-One](images/er-diagram_art-base-one.jpg)
-
 
 ### Entities
 
@@ -99,17 +97,16 @@ The `artwork_mediums` join table includes:
 * `artwork_id`, represents the artwork id as an `INTEGER` with a `FOREIGN KEY` constraint applied. An artwork can have multiple mediums.
 * `medium_id`, represents the medium id as an `INTEGER` with a `FOREIGN KEY` constraint applied. A medium can be used on multiple artworks.
 
-#### Series
+#### Sections
 
-The `series` table includes:
+The `sections` table includes:
 
 * `id`, represents a unique ID for each medium as an `INTEGER`. This column has the `PRIMARY KEY` constraint applied.
 * `name`, represents the name of the series an artwork belongs to, i.e. the 'Blue Period' or 'Storefront Paintings' as `TEXT`. The user can define multiple series, rather than defining it as finite set of enums in the `artworks` table, `UNIQUE` constraint applied as there should only be one of each series.
 * `description`, represents a description of the `series` in `TEXT`, for example to provide context and further information for the user. Picasso's Blue Period could be defined as: 
 
         "The Blue Period (Spanish: Período Azul) comprises the works produced by Spanish painter Pablo Picasso between 1901 and 1904. During this time, Picasso painted essentially monochromatic paintings in shades of blue and blue-green, only occasionally warmed by other colors. These sombre works, inspired by Spain and painted in Barcelona and Paris, are now some of his most popular works, although he had difficulty selling them at the time."  (from Wikipedia) https://en.wikipedia.org/wiki/Picasso%27s_Blue_Period
-
-
+* `type`, as `TEXT` with a constraint limiting it to `department` (broad) or `series` (more specific).
 
 #### Persons
 
@@ -122,6 +119,7 @@ The `persons` table includes:
 * `phone`, as `INTEGER`
 * `org`, as `INTEGER`, with `FOREIGN KEY` constraint linking to `organization` record.
 * `note`, as `TEXT`, `OPTIONAL/NULLABLE`, optional space to include a note about the person, i.e. met them at an open studio.
+* `type`, as a `TEXT` enum listing out ('curator', 'collector', 'client', 'contact...)
 
 #### Organizations
 
@@ -132,7 +130,7 @@ The `organizations` table includes:
 * `address` as `TEXT`.
 * `address_1` as `TEXT`.
 * `city` as `TEXT`.
-* `state` as `TEXT` with a constraint to 2 characters.
+* `state` as `TEXT`, in a future version add a constraint to 2 characters.
 * `zip` as `TEXT` --> what about zips that start with 0? That's why it's `TEXT`.
 * `country` as `TEXT`.
 
@@ -144,27 +142,51 @@ The `sold_artworks` table includes:
 * `artwork_id` `INTEGER` with `FOREIGN KEY` constraint.
 * `person_id` `INTEGER` with `FOREIGN KEY` constraint.
 * `org_id` NULLABLE, `INTEGER` with `FOREIGN KEY` constraint. Not every sale will have an organization attached, i.e. selling to an individual as opposed to selling to a person who works at the Met Museum!
-* `price`, `NUMERIC` records the amount. If the sale is a donation record $0.00 as the sale amount.
-* `date` NUMERIC TIME DATE that records the time of the sale. `DEFAULT CURRENT_TIMESTAMP`.
+* `price`, `DECIMAL` records the amount. If the sale is a donation record $0.00 as the sale amount.
+* `date_sold`, `NUMERIC` for the actual date sold in this format '2024-12-24'.
+* `timestamp` NUMERIC TIME DATE that records the time of the sale. `DEFAULT CURRENT_TIMESTAMP`.
 NOTE: Triggers the T/F sold boolean on the artwork record
 
 ### Relationships
 
-In this section you should include your entity relationship diagram and describe the relationships between the entities in your database.
+The Entity Relationship (ER) Diagram below, shows the relationships between the various entities within the database. The choice to hand draw the diagram was purposeful in that it is in tune with artworks represnted with the database.
+
+![Entity Relationship Diagram for Art-Base-One](images/er-diagram_art-base-one.jpg)
+
+Details:
+* One artist can make 0 to many artworks
+* An artwork is associated with 1 artist, 1 department, 1 series, and 0 to many mediums.
+* A medium exists in its own table, and each name must be unique. Many mediums may be connected to many artworks, hence...
+* The artworks_mediums table is JOIN table to satisfy the many to many relationship between artworks and mediums.
+* A section is broken up into two organizational categories: department and series. An artwork can have one department and one series associated with it.
+* A person can be attached to 0 to 1 organizations.
+* A person can buy 0 or more artworks, but all transactions are 1 to 1. 1 person buys one artwork, recoded on the...
+* sold_artworks table, which records 1 person, 1 organization, and 1 artwork per line. A sale triggers the sold status to flip from false (0) to true (1) on the artwork in question.
+* An organization stands alone. A person can be connected to 1 organization, but many persons may be connected to a single organization.
 
 ## Optimizations
 
-In this section you should answer the following questions:
+I created the following views, triggers and indexes to optimize use of the database.
 
-* Which optimizations (e.g., indexes, views) did you create? Why?
+* `VIEWS`
+    * `art_list` to see human readable information for the artworks table, connecting the medium(s), artist name, department, and series to the listing. It is made up of 3 sub-views.
+        * `mediums_by_artwork`: It's tedious to query a join table to list the mediums an artwork is made out of, therefore created this view.
+        * `series_by_artwork`: Adds name of series and attaches to artwork id.
+        * `department_by_artwork`: Similar to the previous, adds name of department and attaches to artwork id, these latter two views also help with the fact that we're getting to bits of data from the same `sections` table.
+
+* `INDEXES`
+    * `artist_ids`: helps when searching for artist_ids on Artworks
+    * `titles`: helps when searching for titles of Artworks, often used when adding mediums to an artwork.
+CREATE INDEX "artist_ids" on "artworks" ("artist_id");
+
+* `TRIGGER`
+    * `update_artwork_sold`: This trigger will auto update an artworks sold status from 0 (false) to 1 (true) when added to sold_artworks.
 
 ## Limitations
 
-In this section you should answer the following questions:
-
-* What are the limitations of your design?
-* What might your database not be able to represent very well?
+This state of the database is limited in having an efficient way to add in ,ultiple artwork mediums, having collaborative artworks and listing additional artists which would entail a join table and means of querying that, and also as discussed before, having a platfrom for print sales which reference artworks in the system.
 
 ## Dev notes
 
 * When using own machine, make the CLI output pretty with `.mode column` and `.headers on` via https://www.sqlite.org/cli.html section 5.
+* I found it interesting, in what only became apparent when trying to query, insert, delete, update and work with the database, how it in turn led to changes in the design of the tables. Some fields made sense to become Nullable (like email addresses for organization, since the person associated with it is the main contact anyway), or to restructure two tables into one (departments and series combined into the more broad sections). 

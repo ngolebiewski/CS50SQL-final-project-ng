@@ -81,6 +81,7 @@ CREATE TABLE "persons" (
     "email" TEXT UNIQUE,
     "phone" INTEGER,
     "org" INTEGER,
+    "note" TEXT,
     "type" TEXT NOT NULL DEFAULT('contact') CHECK("type" IN ('collector', 'friend', 'artist', 'client', 'curator', 'other')),
     PRIMARY KEY("id"),
     FOREIGN KEY("org") REFERENCES "organizations"("id")

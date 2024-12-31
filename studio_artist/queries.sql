@@ -136,6 +136,7 @@ SELECT * FROM "artworks"
 WHERE "artist_id" = (SELECT "id" FROM "artists" WHERE "last_name" = "Picasso");
 
 -- Show all human readable artworks by artist's name from the art_list view.
+-- i.e. List all of Pable Picasso's artworks in this database.
 SELECT * FROM "art_list"
 WHERE "name" = "Pablo Picasso";
 
@@ -153,11 +154,6 @@ JOIN "artworks_mediums" ON "mediums"."id" = "artworks_mediums"."medium_id"
 JOIN "artworks" ON "artworks_mediums"."artwork_id" = "artworks"."id"
 WHERE "artworks_mediums"."artwork_id" = (SELECT "id" FROM "artworks" WHERE "title" = 'The Old Guitarist')
 GROUP BY "title";
-
--- SELECT "title", "mediums" FROM "artworks"
--- WHERE "artworks"."id" = 1
--- JOIN "mediums" on 
-
 
 -- Find artwork by title, list basic info and artist name
 SELECT "title", "size", "year", "first_name", "last_name"
@@ -216,14 +212,14 @@ COMMIT;
 SELECT * FROM "sold_artworks";
 SELECT "title", "sold" FROM "artworks" WHERE "sold" = 1;
 
--- UPDATE ARTWORKS SET SOLD = 0 WHERE TITLE = 'Grand Street';
+-- MADE A MISTAKE?
+UPDATE "artworks" SET "sold" = 0 WHERE "title" = 'Grand Street';
+DELETE FROM "sold_artworks" WHERE "artwork_id" = (SELECT "id" FROM "artworks" WHERE "title" = "Grand Street");
 
--- Find all artworks in a series
--- List all series by an artist
--- Find all artworks within a specific department in a section.
--- Create a Sale and update artwork records with Triggers sold to True
--- Search artworks by a keyword in descriptions using LIKE
--- Find all artworks missing an image
--- list all artists
--- list all dead artists
--- Find all artworks that have 'watercolor' as a medium.
+-- OTHER POSSIBLE QUERIES OUTSIDE THE SCOPE OF EXAMPLES FOR COMPLETING THIS PROJECT
+    -- Find all artworks in a series
+    -- List all series by an artist
+    -- Find all artworks within a specific department in a section.
+    -- Search artworks by a keyword in descriptions using LIKE
+    -- Find all artworks missing an image
+    -- Get Sales records by year, month, artist, etc.

@@ -1,11 +1,11 @@
 -- In this SQL file, write (and comment!) the typical SQL queries users will run on your database
 
--- Add artists to the database
+-- Add artists to the database. Note, temporarily not using long_bio as it makes output look messy.
 INSERT INTO "artists" (
     "first_name", 
     "last_name", 
     "short_bio",
-    -- "long_bio", 
+    -- "long_bio",
     "image_url", 
     "birth_country",
     "birth_year",
@@ -44,7 +44,7 @@ VALUES(
     (SELECT "id" FROM "mediums" WHERE "name" = "canvas")
     );
 
--- add another medium, would like to find a more efficient way to add, as this is repetitious.
+-- add another set of mediums to an artwork, would like to find a more efficient way to add, as this is repetitious.
 INSERT INTO "artworks_mediums" ("artwork_id", "medium_id")
 VALUES(
     (SELECT "id" FROM "artworks" WHERE "title" = 'Grand Street'), 
@@ -130,7 +130,6 @@ VALUES(
     (SELECT "id" FROM "mediums" WHERE "name" = "canvas")
     );
 
-
 -- Search all artworks by artist's last name.
 SELECT * FROM "artworks"
 WHERE "artist_id" = (SELECT "id" FROM "artists" WHERE "last_name" = "Picasso");
@@ -155,7 +154,7 @@ JOIN "artworks" ON "artworks_mediums"."artwork_id" = "artworks"."id"
 WHERE "artworks_mediums"."artwork_id" = (SELECT "id" FROM "artworks" WHERE "title" = 'The Old Guitarist')
 GROUP BY "title";
 
--- Find artwork by title, list basic info and artist name
+-- Find artwork by portion of an artwork's title, list basic info and artist name
 SELECT "title", "size", "year", "first_name", "last_name"
 FROM "artworks"
 JOIN "artists" on "artists"."id" = "artworks"."artist_id"

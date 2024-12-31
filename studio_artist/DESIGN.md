@@ -1,44 +1,47 @@
 # Design Document
 
+## Art-Base-One
+![Sketched logo for Art-Base-One](images/art-base-one-sketch-logo.jpg)
 By Nick Golebiewski
 
 Video overview: <URL HERE>
 
 ## Scope
 
-This is a database for a professional visual artist, that will track their work. Personal note: I am switching careers from being a freelance artist to a software engineer, and will use this database to better access my 5,000+ artworks. 
+This is a database for professional visual artists to track their artworks, sales, and contacts, exapandable for use by galleries and even museums. Personal note: I am switching careers from being a freelance visua artist to a software engineer, and will use this database to better access my 5,000+ artworks. 
 
-In a way, this project is a combination of the Metropolitan Museum of Art's artwork database (for organizing information about an individual artwork)and Etsy's database (for selling prints/artwork). Included in the artwork's scope is:
+This project takes inspiration from the Metropolitan Museum of Art's Public API for their artwork database (for organizing information about an individual artwork) with a touch of Etsy's sales capabilities. Included in the artwork's scope is:
 
 * Artists: Name, bio, image (there may be collaborators on an artwork, or if used by a gallery, a way to organize multiple artists' works).
 * Artworks: A record for each individual artwork, i.e. a painting or a film.
 * Mediums: The material(s) used to create an artwork, i.e. watercolor, paper, pen & ink.
-* Category: Similar to department at the Met Museum, Film, Painting, Drawing (similar to medium, but can only have one)
-* Series: The series of work an artwork belongs to. i.e. Drawing-a-day project, Storefront paintings, etc.
-* People: Those who collect, express interest in artwork, studio contacts, or hire.
-* Projects: A person/org can hire the artist for a project, info tracked here.
-* Organization: For example, the organization a person belongs to that collected an artwork.
-* Images: Allows for multiple images of an artwork.
-* Sold: Keeps track of sold artworks. 
-* OUTSIDE THE CURRENT SCOPE: Payment system, art prints (reproductions of artwroks for sale) inventory, methods for importing data from Instagram (user doata download in JSON format).
+* Sections: Ways to categorize artworks. 
+    * Departments are imilar to department at the Met Museum and the largest umbrella such as Film, Painting, Drawing.
+    * Series: A more granular unit of categorization. The series of work an artwork belongs to. i.e. Drawing-a-day project, Storefront paintings, The Blue Period, etc.
+* Persons: Those who collect, express interest in artwork, studio contacts, or hire.
+* Organizations: For example, the organization a person belongs to that collected an artwork.
+* Sold Artworks: Keeps track of sold artworks. 
+* OUTSIDE THE CURRENT SCOPE: 
+    * Payment system.
+    * fine art prints (reproductions of artworks for sale) inventory, 
+    * methods for importing data from Instagram (user doata download in JSON format) into the artworks table. 
+    *  Projects, when a person hires the artist, info on project can be tracked via this and used for invoicing, etc. 
+    * Alternate Images: Allows for multiple images of an artwork.
 
 ## Functional Requirements
 
-In this section you should answer the following questions:
-
-* What should a user be able to do with your database?
-* What's beyond the scope of what a user should be able to do with your database?
-
 This database will support:
 
-* CRUD operations for artists and people(contacts/collectors/clients)
-* Tracking artworks and artwork sales. 
-* Adding artworks from the artist, importing artworks posted on Instagram.
-* This system won't support print sales at the moment. 
+* CRUD operations for artists, artworks and people (contacts/collectors/clients)
+* Tracking artworks, artwork availaibility and artwork sales. 
+* This system won't support fine art print sales at the moment, client project tracking, nor adding in artist collaborators on a single artwork.
 
 ## Representation
 
 Entities are captured in SQLite tables and an image folder with the following schema.
+
+![Entity Relationship Diagram for Art-Base-One](images/er-diagram_art-base-one.jpg)
+
 
 ### Entities
 

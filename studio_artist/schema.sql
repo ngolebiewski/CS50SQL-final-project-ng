@@ -93,7 +93,7 @@ CREATE TABLE "sold_artworks" (
     "person_id" INTEGER NOT NULL,
     "org_id" INTEGER,
     "price" DECIMAL,
-    "date_sold" NUMERIC DATE, -- CHECK THIS.
+    "date_sold" NUMERIC DATE,
     "timestamp" DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY("id"),
     FOREIGN KEY("artwork_id") REFERENCES "artworks"("id"),
@@ -111,9 +111,7 @@ BEGIN
     WHERE "id" = NEW."artwork_id";
 END;
 
-
-
--- CREATE A VIEW WITH ALL INFO PLACED INTO THE ARTWORKS TAB --> mediums, series, artist's name
+-- CREATE A VIEW WITH ALL INFO PLACED INTO THE ARTWORKS TAB --> mediums, series, artist names
 
 -- It's tedious to query a join table to list the mediums an artwork is made out of, therefore creating this view.
 CREATE VIEW "mediums_by_artwork" AS
@@ -123,11 +121,13 @@ JOIN "artworks_mediums" ON "mediums"."id" = "artworks_mediums"."medium_id"
 JOIN "artworks" ON "artworks_mediums"."artwork_id" = "artworks"."id"
 GROUP BY "title";
 
+-- Adds name of series and attaches to artwork id
 CREATE VIEW "series_by_artwork" AS
 SELECT "name", "artworks"."id"
 FROM "sections"
 JOIN "artworks" ON "artworks"."series"= "sections"."id";
 
+-- Adds name of department and attaches to artwork id
 CREATE VIEW "department_by_artwork" AS
 SELECT "name", "artworks"."id"
 FROM "sections"

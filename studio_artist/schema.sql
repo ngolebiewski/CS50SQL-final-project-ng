@@ -1,5 +1,4 @@
 -- Represent artist entities in this table
-
 CREATE TABLE "artists" (
     "id" INTEGER,
     "first_name" TEXT NOT NULL, -- use 'Unknown' if not known
@@ -19,8 +18,8 @@ CREATE TABLE "artists" (
 -- and added in the 'type' field to differentiate. 
 CREATE TABLE "sections"(
     "id" INTEGER, 
-    "name" TEXT UNIQUE,
-    "description" TEXT NOT NULL CHECK(length(description) <= 100),
+    "name" TEXT NOT NULL UNIQUE,
+    "description" TEXT NOT NULL CHECK(length(description) <= 300),
     "type" TEXT NOT NULL CHECK("type" IN('series', 'department')),
     PRIMARY KEY("id")
 );
@@ -48,14 +47,14 @@ CREATE TABLE "artworks" (
      -- mediums of artwork via a join table
     "year" INTEGER,
     "image_url" TEXT,
-    "descriptiom" TEXT,
-    "department" INTEGER NOT NULL,
-    "series" INTEGER NOT NULL,
-    "date_added" CURRENT_TIMESTAMP,
+    "description" TEXT,
+    "department" INTEGER,
+    "series" INTEGER,
+    "date_added" TIMESTAMP DEFAULT(CURRENT_TIMESTAMP),
     "price" DECIMAL,
     "sold" INTEGER NOT NULL DEFAULT(0) CHECK("sold" IN (0,1)), -- False/0 = not sold, True/1 = sold
     PRIMARY KEY("id"),
-    FOREIGN KEY("artist") REFERENCES "artists"("id"),
+    FOREIGN KEY("artist_id") REFERENCES "artists"("id"),
     FOREIGN KEY("department") REFERENCES "section"("id"),
     FOREIGN KEY("series") REFERENCES "section"("id") -- references a different section id, can you do this?
 );
@@ -102,4 +101,38 @@ CREATE TABLE "sold_artworks" (
     FOREIGN KEY("org_id") REFERENCES "organizations"("id")
 );
 
+
+-- CREATE A VIEW WITH ALL INFO PLACED INTO THE ARTWORKS TAB --> mediums, series, artist's name
+
+-- It's tedious to query a join table to list the mediums an artwork is made out of, therefore creating this view.
+CREATE VIEW "mediums_by_artwork" AS
+SELECT GROUP_CONCAT("mediums"."name") AS "mediums", "title", "artworks"."id"
+FROM "mediums"
+JOIN "artworks_mediums" ON "mediums"."id" = "artworks_mediums"."medium_id"
+JOIN "artworks" ON "artworks_mediums"."artwork_id" = "artworks"."id"
+GROUP BY "title";
+
+CREATE VIEW "series_by_artwork" AS
+SELECT "name", "artworks"."id"
+FROM "sections"
+JOIN "artworks" ON "artworks"."series"= "sections"."id";
+
+CREATE VIEW "department_by_artwork" AS
+SELECT "name", "artworks"."id"
+FROM "sections"
+JOIN "artworks" ON "artworks"."department"= "sections"."id";
+
+-- An overall view of the artworks for humans to read, filling in the artist name, mediums, series, and department from their id numbers. 
+CREATE VIEW "art_list" AS
+SELECT "artists"."id", first_name || ' ' || last_name AS "name", "artworks"."title", "size", "year", "mediums", "artworks"."image_url", "artworks"."descriptiom", 
+    "series_by_artwork"."name" AS "series", "department_by_artwork"."name" AS "department", "price", "sold"
+FROM ARTWORKS
+JOIN ARTISTS ON "artists"."id" = "artworks"."artist_id"
+JOIN "mediums_by_artwork" ON "mediums_by_artwork"."id" = "artworks"."id"
+LEFT JOIN "series_by_artwork" ON "series_by_artwork"."id" = "artworks"."id"
+LEFT JOIN "department_by_artwork" ON "department_by_artwork"."id" = "artworks"."id"
+ORDER BY "artists"."last_name" ASC, "artworks"."id" ASC
+;
+
+CREATE INDEX "artist_ids" on "artworks" ("artist_id");
 

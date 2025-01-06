@@ -8,7 +8,7 @@ Video overview: https://youtu.be/vc2jk-1yYGA
 
 ## Scope
 
-This is a SQLite database for professional visual artists to track their artworks, sales, and contacts, exapandable for use by galleries and even museums. Personal note: I am expanding my career from being a freelance visual artist to include software engineering, and will use this database to better access my 5,000+ artworks. 
+This is a SQLite database for professional visual artists to track their artworks, sales, and contacts, expandable for use by galleries and even museums. Personal note: I am expanding my career from being a freelance visual artist to incorporate software engineering, and will use this database to better access my 5,000+ artworks. 
 
 This project takes inspiration from the Metropolitan Museum of Art's Public API for their artwork database (for organizing information about an individual artwork) with a touch of Etsy's sales capabilities. Included in the artwork's scope is:
 

@@ -153,6 +153,8 @@ The Entity Relationship (ER) Diagram below, shows the relationships between the 
 
 ![Entity Relationship Diagram for Art-Base-One](images/er-diagram_art-base-one.jpg)
 
+If ER diagram image doesn't appear, view it here: https://github.com/ngolebiewski/CS50SQL-final-project-ng/blob/main/studio_artist/images/er-diagram_art-base-one.jpg
+
 Details:
 * One artist can make 0 to many artworks
 * An artwork is associated with 1 artist, 1 department, 1 series, and 0 to many mediums.

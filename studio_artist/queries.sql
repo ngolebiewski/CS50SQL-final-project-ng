@@ -208,7 +208,7 @@ INSERT INTO "sold_artworks" ("artwork_id", "person_id", "org_id", "price", "date
 COMMIT;
 
 -- CHECK the sale record, and then the sold status 
-SELECT * FROM "sold_artworks";
+SELECT * FROM "sold_artworks"
 SELECT "title", "sold" FROM "artworks" WHERE "sold" = 1;
 
 -- MADE A MISTAKE?
